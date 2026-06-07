@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0f1117" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Termoformadoras</title>
+<link rel="manifest" href="manifest.json" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#0f1117;--bg2:#1a1d27;--bg3:#22263a;
+    --border:#2e3248;--border2:#3a3f5c;
+    --text:#e8eaf6;--text2:#9098c0;--text3:#5a6080;
+    --blue:#4a90d9;--blue-bg:#1a2a3e;
+    --green:#4caf7d;--green-bg:#142a1e;
+    --yellow:#f0b429;--yellow-bg:#2a2010;
+    --red:#e05555;--red-bg:#2a1414;
+    --radius:12px;--radius-sm:8px;
+    --font:'Segoe UI',system-ui,sans-serif;
+  }
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden}
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 0 80px}
+
+  /* LOCK SCREEN */
+  #lock-screen{position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem}
+  .lock-icon{font-size:56px;margin-bottom:1.5rem}
+  .lock-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:.5rem;text-align:center}
+  .lock-sub{font-size:14px;color:var(--text2);margin-bottom:2rem;text-align:center}
+  .lock-input{width:100%;padding:14px 16px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--radius);font-size:18px;color:var(--text);letter-spacing:3px;text-align:center;margin-bottom:1rem}
+  .lock-input:focus{outline:none;border-color:var(--blue)}
+  .lock-btn{width:100%;padding:14px;background:var(--blue);border:none;border-radius:var(--radius);font-size:16px;font-weight:600;color:#fff;cursor:pointer}
+  .lock-error{color:var(--red);font-size:13px;margin-top:.5rem;text-align:center}
+
+  /* SCREENS */
+  .screen{display:none;padding:1rem}
+  .screen.active{display:block}
+
+  /* HEADER */
+  .header{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+  .header-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .header h1{font-size:18px;font-weight:700;color:var(--text)}
+
+  /* BACK BTN */
+  .btn-back{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;color:var(--text2);cursor:pointer;margin-bottom:1rem}
+
+  /* MENU CARDS */
+  .menu-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:.75rem;cursor:pointer;display:flex;align-items:center;gap:14px;active:background:var(--bg3)}
+  .menu-card:active{background:var(--bg3)}
+  .menu-icon{width:48px;height:48px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+  .menu-label{font-size:16px;font-weight:600;color:var(--text)}
+  .menu-sub{font-size:13px;color:var(--text2);margin-top:2px}
+
+  /* FORM */
+  h2{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:1.1rem 0 .5rem}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+  .field label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+  .field input,.field select,.field textarea{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 13px;font-size:15px;color:var(--text);width:100%;-webkit-appearance:none}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue)}
+  .field textarea{height:72px;resize:vertical}
+  .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239098c0' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+  /* SECTION BOX */
+  .section-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:.9rem 1rem;margin-bottom:.75rem}
+  .section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.65rem}
+
+  /* TABLE */
+  table.t{width:100%;border-collapse:collapse;font-size:14px}
+  table.t th{font-size:11px;font-weight:600;color:var(--text3);padding:5px 8px;text-align:center;border-bottom:1px solid var(--border)}
+  table.t th:first-child{text-align:left}
+  table.t td{padding:6px 6px;border-bottom:1px solid var(--border);color:var(--text);font-size:14px;vertical-align:middle}
+  table.t td:first-child{color:var(--text2)}
+  table.t input{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 4px;width:68px;text-align:center;font-size:14px;color:var(--text)}
+  table.t input:focus{outline:none;border-color:var(--blue)}
+
+  /* ZONAS */
+  .zonas-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .zona-field{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .zona-field label{font-size:10px;color:var(--text3);font-weight:600}
+  .zona-field input{width:44px;text-align:center;padding:6px 2px;font-size:13px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;color:var(--text)}
+  .zona-field input:focus{outline:none;border-color:var(--blue)}
+
+  /* CHECKS */
+  .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .check-item{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;font-size:14px;color:var(--text);position:relative}
+  .check-item input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--blue)}
+  .check-item.checked{border-color:var(--blue);background:var(--blue-bg)}
+  .check-item.checked .cl{color:var(--blue)}
+  .check-item .del-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px 4px}
+  .check-largada{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;font-size:14px;color:var(--text);margin-top:.5rem}
+  .check-largada input[type=checkbox]{width:18px;height:18px;accent-color:var(--blue)}
+  .check-largada.checked{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+
+  /* BUTTONS */
+  .btn-primary{width:100%;padding:14px;background:var(--blue);border:none;border-radius:var(--radius);font-size:16px;font-weight:600;color:#fff;cursor:pointer;margin-top:1rem}
+  .btn-primary:active{opacity:.85}
+  .btn-add-param{display:inline-flex;align-items:center;gap:6px;background:none;border:1px dashed var(--border2);border-radius:var(--radius-sm);padding:9px 14px;font-size:14px;cursor:pointer;color:var(--text2);margin-top:.5rem}
+  .btn-add-param:active{background:var(--bg2)}
+
+  /* BADGES */
+  .badge-ok{background:var(--green-bg);color:var(--green);font-size:13px;padding:8px 14px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;margin-top:.75rem;width:100%}
+  .badge-err{background:var(--red-bg);color:var(--red);font-size:13px;padding:8px 14px;border-radius:var(--radius-sm);display:inline-flex;align-items:center;gap:6px;margin-top:.75rem;width:100%}
+
+  /* CHIPS */
+  .termo-chip{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;font-size:14px;cursor:pointer;margin:4px;color:var(--text)}
+  .termo-chip:active{border-color:var(--blue);color:var(--blue)}
+
+  /* NO DATA */
+  .no-data{font-size:14px;color:var(--text2);padding:1.5rem;text-align:center;background:var(--bg2);border-radius:var(--radius);border:1px solid var(--border)}
+
+  /* INFO BADGE */
+  .info-badge{font-size:12px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;display:inline-block}
+
+  /* ADD PARAM ROW */
+  .add-param-row{display:flex;gap:8px;align-items:flex-end;margin-top:.5rem;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.7rem .9rem}
+
+  /* RESULT CARDS */
+  .result-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:.65rem;cursor:pointer}
+  .result-card:active{border-color:var(--blue)}
+  .rc-title{font-size:16px;font-weight:600;color:var(--text)}
+  .rc-sub{font-size:13px;color:var(--text2);margin-top:4px}
+  .rc-arrow{float:right;color:var(--blue);font-size:13px}
+
+  /* DETAIL */
+  .detail-section{margin-bottom:1.1rem}
+  .detail-section h3{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;padding-bottom:.35rem;border-bottom:1px solid var(--border)}
+  .detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border)}
+  .detail-row:last-child{border-bottom:none}
+  .dk{color:var(--text2);font-size:14px}
+  .dv{color:var(--text);font-size:14px;font-weight:500;text-align:right;margin-left:1rem}
+  .detail-tiempo{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.65rem .9rem;margin-bottom:.5rem}
+  .detail-tiempo .etapa-nombre{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.4rem}
+  .detail-tiempo .etapa-vals{display:flex;gap:1rem}
+  .detail-tiempo .val-box{flex:1;background:var(--bg3);border-radius:6px;padding:.4rem .6rem;text-align:center}
+  .detail-tiempo .val-label{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;margin-bottom:2px}
+  .detail-tiempo .val-num{font-size:18px;font-weight:700;color:var(--blue)}
+
+  /* ZONA DISPLAY */
+  .zonas-display{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0}
+  .zona-display-item{text-align:center;background:var(--bg3);border-radius:8px;padding:6px 10px;min-width:44px}
+  .zona-display-item .zl{font-size:10px;color:var(--text3);font-weight:600}
+  .zona-display-item .zv{font-size:16px;font-weight:700;color:var(--text)}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA DE BLOQUEO -->
+<div id="lock-screen">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Termoformadoras</div>
+  <div class="lock-sub">Ingresá la contraseña para acceder</div>
+  <input class="lock-input" type="password" id="lock-input" placeholder="••••••••••" maxlength="20" />
+  <button class="lock-btn" onclick="checkPassword()">Ingresar</button>
+  <div class="lock-error" id="lock-error"></div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
+
+<!-- HOME -->
+<div class="screen active" id="s-home">
+  <div class="header">
+    <div class="header-icon" style="background:#1a2a3e;font-size:22px">⚙️</div>
+    <h1>Termoformadoras</h1>
+  </div>
+  <div class="menu-card" onclick="go('s-buscar')">
+    <div class="menu-icon" style="background:#1a2a3e">🔍</div>
+    <div><div class="menu-label">Buscar programa</div><div class="menu-sub">Consultá programas guardados</div></div>
+  </div>
+  <div class="menu-card" onclick="go('s-cargar')">
+    <div class="menu-icon" style="background:#142a1e">⬆️</div>
+    <div><div class="menu-label">Cargar programa</div><div class="menu-sub">Registrá un programa en una máquina</div></div>
+  </div>
+  <div class="menu-card" onclick="go('s-nueva-termo')">
+    <div class="menu-icon" style="background:#2a2010">➕</div>
+    <div><div class="menu-label">Agregar termoformadora</div><div class="menu-sub">Configurá la plantilla de una nueva máquina</div></div>
+  </div>
+</div>
+
+<!-- AGREGAR TERMOFORMADORA -->
+<div class="screen" id="s-nueva-termo">
+  <button class="btn-back" onclick="go('s-home')">← Inicio</button>
+  <div class="header">
+    <div class="header-icon" style="background:#2a2010">➕</div>
+    <h1>Agregar termoformadora</h1>
+  </div>
+  <div class="grid2">
+    <div class="field"><label>N° / Nombre</label><input type="text" id="nt-num" placeholder="Ej: TF-12" /></div>
+    <div class="field"><label>Velocidad base</label><input type="text" id="nt-vel" placeholder="Ej: 25 c/min" /></div>
+  </div>
+
+  <h2>Etapas de tiempo</h2>
+  <div class="check-grid" id="etapas-checks"></div>
+  <button class="btn-add-param" onclick="mostrarAddParam()">+ Agregar parámetro personalizado</button>
+  <div id="add-param-form" style="display:none">
+    <div class="add-param-row">
+      <div class="field" style="flex:1;margin:0"><label>Nombre del parámetro</label><input type="text" id="nuevo-param-nombre" placeholder="Ej: Falso fondo 3" /></div>
+      <button style="padding:10px 14px;font-size:14px;cursor:pointer;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg3);color:var(--text);white-space:nowrap" onclick="agregarParam()">✓</button>
+      <button style="padding:10px 10px;font-size:14px;cursor:pointer;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;color:var(--text2)" onclick="document.getElementById('add-param-form').style.display='none'">✕</button>
+    </div>
+  </div>
+
+  <h2 style="margin-top:1.25rem">Opciones adicionales</h2>
+  <div class="check-largada" id="largada-check" onclick="toggleLargada()">
+    <input type="checkbox" id="nt-largada" onclick="event.stopPropagation();toggleLargada()" />
+    <span>Largada (3 campos al cargar programa)</span>
+  </div>
+
+  <h2 style="margin-top:1.25rem">Zonas de temperatura</h2>
+  <div class="grid2">
+    <div class="field"><label>Zonas pantalla superior</label><input type="number" id="nt-zsup" min="0" max="20" value="11" /></div>
+    <div class="field"><label>Zonas pantalla inferior</label><input type="number" id="nt-zinf" min="0" max="10" value="1" /></div>
+  </div>
+
+  <h2>Observaciones de la máquina</h2>
+  <div class="field"><textarea id="nt-obs" placeholder="Notas generales..."></textarea></div>
+
+  <button class="btn-primary" onclick="guardarTermo()">💾 Guardar termoformadora</button>
+  <div id="nt-msg"></div>
+</div>
+
+<!-- CARGAR PROGRAMA -->
+<div class="screen" id="s-cargar">
+  <button class="btn-back" onclick="go('s-home')">← Inicio</button>
+  <div class="header">
+    <div class="header-icon" style="background:#142a1e">⬆️</div>
+    <h1>Cargar programa</h1>
+  </div>
+  <div id="cargar-lista"></div>
+  <div id="cargar-form" style="display:none">
+    <button class="btn-back" onclick="volverLista()">← Volver a máquinas</button>
+    <div id="cargar-titulo" style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:1rem"></div>
+
+    <h2>Datos del producto</h2>
+    <div class="grid2">
+      <div class="field"><label>Producto</label><input type="text" id="c-prod" /></div>
+      <div class="field"><label>Subíndice</label><input type="text" id="c-sub" /></div>
+      <div class="field"><label>Color</label><input type="text" id="c-color" /></div>
+      <div class="field"><label>Peso</label><input type="text" id="c-peso" placeholder="Ej: 150g" /></div>
+      <div class="field"><label>Material</label><input type="text" id="c-mat" /></div>
+      <div class="field"><label>Velocidad</label><input type="text" id="c-vel" placeholder="ciclos/min" /></div>
+    </div>
+
+    <h2>Formato de armado</h2>
+    <div class="grid2">
+      <div class="field"><label>Camisas</label><input type="text" id="c-cam" /></div>
+      <div class="field"><label>Expulsores</label><input type="text" id="c-exp" /></div>
+      <div class="field"><label>Mandriles</label><input type="text" id="c-mand" /></div>
+    </div>
+    <div class="grid3">
+      <div class="field"><label>Matriz 1</label><input type="text" id="c-mat1" /></div>
+      <div class="field"><label>Matriz 2</label><input type="text" id="c-mat2" /></div>
+      <div class="field"><label>Matriz 3</label><input type="text" id="c-mat3" /></div>
+    </div>
+
+    <div id="plantilla-dinamica"></div>
+
+    <button class="btn-primary" onclick="guardarPrograma()">💾 Guardar programa</button>
+    <div id="c-msg"></div>
+  </div>
+</div>
+
+<!-- BUSCAR -->
+<div class="screen" id="s-buscar">
+  <button class="btn-back" onclick="go('s-home')">← Inicio</button>
+  <div class="header">
+    <div class="header-icon" style="background:#1a2a3e">🔍</div>
+    <h1>Buscar programa</h1>
+  </div>
+  <div id="s-buscar-main">
+    <div class="grid2">
+      <div class="field"><label>Producto</label><input type="text" id="b-prod" placeholder="Nombre o número" /></div>
+      <div class="field"><label>Termoformadora</label><select id="b-termo"><option value="">— Todas —</option></select></div>
+    </div>
+    <button class="btn-primary" style="margin-top:0" onclick="buscar()">🔍 Buscar</button>
+    <div id="b-resultado" style="margin-top:1rem"></div>
+  </div>
+  <div id="s-detalle" style="display:none"></div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ── CONTRASEÑA ──────────────────────────────────────────────
+const PASSWORD = 'BilaBerardo';
+
+function checkPassword(){
+  const val = document.getElementById('lock-input').value;
+  if(val === PASSWORD){
+    localStorage.setItem('tf_auth','1');
+    document.getElementById('lock-screen').style.display='none';
+    document.getElementById('main-app').style.display='block';
+  } else {
+    document.getElementById('lock-error').textContent='Contraseña incorrecta. Intentá de nuevo.';
+    document.getElementById('lock-input').value='';
+  }
+}
+document.getElementById('lock-input').addEventListener('keydown', e=>{ if(e.key==='Enter') checkPassword(); });
+
+// Verificar si ya está autenticado
+if(localStorage.getItem('tf_auth')==='1'){
+  document.getElementById('lock-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+}
+
+// ── BASE DE DATOS ───────────────────────────────────────────
+const ETAPAS_STD=['Moldeo','Pistón','Soplado 1','Soplado 2','Posición stop','Prensa pestaña'];
+const ETAPAS_OPC=['Bobinador','Falso fondo 1','Falso fondo 2'];
+let DB={termos:[],programas:[]};
+let termoActual=null;
+let etapasPersonalizadas=[];
+
+function saveDB(){ try{ localStorage.setItem('tfdb',JSON.stringify(DB)); }catch{} }
+function loadDB(){ try{ const r=localStorage.getItem('tfdb'); if(r) DB=JSON.parse(r); }catch{} }
+loadDB();
+
+// ── NAVEGACIÓN ──────────────────────────────────────────────
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='s-nueva-termo') initEtapasChecks();
+  if(id==='s-cargar') renderCargarLista();
+  if(id==='s-buscar'){ initBuscar(); document.getElementById('s-buscar-main').style.display='block'; document.getElementById('s-detalle').style.display='none'; }
+}
+
+// ── AGREGAR TERMOFORMADORA ──────────────────────────────────
+function toggleLargada(){
+  const cb=document.getElementById('nt-largada');
+  cb.checked=!cb.checked;
+  document.getElementById('largada-check').classList.toggle('checked',cb.checked);
+}
+
+function initEtapasChecks(){
+  etapasPersonalizadas=[];
+  document.getElementById('add-param-form').style.display='none';
+  document.getElementById('nt-largada').checked=false;
+  document.getElementById('largada-check').classList.remove('checked');
+  document.getElementById('nt-num').value='';
+  document.getElementById('nt-vel').value='';
+  document.getElementById('nt-obs').value='';
+  document.getElementById('nt-msg').innerHTML='';
+  renderChecks();
+}
+
+function renderChecks(){
+  const c=document.getElementById('etapas-checks');
+  c.innerHTML='';
+  [...ETAPAS_STD,...ETAPAS_OPC,...etapasPersonalizadas].forEach(e=>{
+    const isStd=ETAPAS_STD.includes(e);
+    const isCustom=etapasPersonalizadas.includes(e);
+    const div=document.createElement('div');
+    div.className='check-item'+(isStd?' checked':'');
+    div.innerHTML=`<input type="checkbox" ${isStd?'checked':''} id="et-${e.replace(/[ /]/g,'_')}" /><span class="cl">${e}</span>${isCustom?`<button class="del-btn" onclick="eliminarParam('${e}')">✕</button>`:''}`;
+    div.querySelector('input').onchange=function(){ div.classList.toggle('checked',this.checked); };
+    c.appendChild(div);
+  });
+}
+
+function mostrarAddParam(){ document.getElementById('add-param-form').style.display='block'; document.getElementById('nuevo-param-nombre').focus(); }
+
+function agregarParam(){
+  const nombre=document.getElementById('nuevo-param-nombre').value.trim();
+  if(!nombre) return;
+  if([...ETAPAS_STD,...ETAPAS_OPC,...etapasPersonalizadas].includes(nombre)){ alert('Ya existe ese parámetro'); return; }
+  etapasPersonalizadas.push(nombre);
+  document.getElementById('nuevo-param-nombre').value='';
+  document.getElementById('add-param-form').style.display='none';
+  renderChecks();
+}
+
+function eliminarParam(nombre){
+  etapasPersonalizadas=etapasPersonalizadas.filter(e=>e!==nombre);
+  renderChecks();
+}
+
+function guardarTermo(){
+  const num=document.getElementById('nt-num').value.trim();
+  if(!num){ document.getElementById('nt-msg').innerHTML='<div class="badge-err">⚠️ Ingresá un nombre o número de termoformadora</div>'; return; }
+  const todas=[...ETAPAS_STD,...ETAPAS_OPC,...etapasPersonalizadas];
+  const etapas=todas.filter(e=>{ const cb=document.getElementById('et-'+e.replace(/[ /]/g,'_')); return cb&&cb.checked; });
+  const obj={
+    numero:num, velocidad:document.getElementById('nt-vel').value,
+    etapas, largada:document.getElementById('nt-largada').checked,
+    zonas_sup:parseInt(document.getElementById('nt-zsup').value)||0,
+    zonas_inf:parseInt(document.getElementById('nt-zinf').value)||0,
+    observaciones:document.getElementById('nt-obs').value,
+  };
+  const idx=DB.termos.findIndex(x=>x.numero===num);
+  if(idx>=0) DB.termos[idx]=obj; else DB.termos.push(obj);
+  saveDB();
+  document.getElementById('nt-msg').innerHTML=`<div class="badge-ok">✓ "${num}" guardada — ${etapas.length} etapas${obj.largada?', con largada':''}, ${obj.zonas_sup} zonas sup., ${obj.zonas_inf} inf.</div>`;
+}
+
+// ── CARGAR PROGRAMA ─────────────────────────────────────────
+function renderCargarLista(){
+  const lista=document.getElementById('cargar-lista');
+  document.getElementById('cargar-form').style.display='none';
+  lista.style.display='block';
+  if(!DB.termos.length){ lista.innerHTML='<div class="no-data">⚠️ No hay termoformadoras cargadas. Agregá una primero.</div>'; return; }
+  lista.innerHTML='<div style="font-size:14px;color:var(--text2);margin-bottom:.75rem">Seleccioná la termoformadora:</div>';
+  DB.termos.forEach(t=>{ const chip=document.createElement('span'); chip.className='termo-chip'; chip.innerHTML=`🔧 ${t.numero}`; chip.onclick=()=>abrirCargar(t); lista.appendChild(chip); });
+}
+
+function abrirCargar(t){
+  termoActual=t;
+  document.getElementById('cargar-lista').style.display='none';
+  document.getElementById('cargar-form').style.display='block';
+  document.getElementById('cargar-titulo').innerHTML=`🔧 Máquina: <strong>${t.numero}</strong>`;
+  ['c-prod','c-sub','c-color','c-peso','c-mat','c-vel','c-cam','c-exp','c-mand','c-mat1','c-mat2','c-mat3'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  renderPlantilla(t);
+  document.getElementById('c-msg').innerHTML='';
+  window.scrollTo(0,0);
+}
+
+function volverLista(){
+  document.getElementById('cargar-lista').style.display='block';
+  document.getElementById('cargar-form').style.display='none';
+  termoActual=null;
+}
+
+function renderPlantilla(t){
+  const area=document.getElementById('plantilla-dinamica');
+  let html='';
+  html+=`<h2>Tiempos (segundos)</h2><div class="section-box"><table class="t"><thead><tr><th>Etapa</th><th>Inicio</th><th>Fin</th></tr></thead><tbody>`;
+  t.etapas.forEach((e,i)=>{ html+=`<tr><td>${e}</td><td><input type="number" id="ti-${i}-ini" /></td><td><input type="number" id="ti-${i}-fin" /></td></tr>`; });
+  html+=`</tbody></table></div>`;
+  if(t.largada){
+    html+=`<h2>Largada</h2><div class="section-box"><div class="grid3">
+      <div class="field"><label>Campo 1</label><input type="text" id="larg-1" /></div>
+      <div class="field"><label>Campo 2</label><input type="text" id="larg-2" /></div>
+      <div class="field"><label>Campo 3</label><input type="text" id="larg-3" /></div>
+    </div></div>`;
+  }
+  html+=`<h2>Presiones</h2><div class="grid2">
+    <div class="field"><label>Presión de moldeo</label><input type="text" id="c-pmol" placeholder="bar" /></div>
+    <div class="field"><label>Presión prensa pestaña</label><input type="text" id="c-ppes" placeholder="bar" /></div>
+  </div>`;
+  if(t.zonas_sup>0){
+    html+=`<h2>Temperatura pantalla superior (${t.zonas_sup} zona${t.zonas_sup>1?'s':''})</h2><div class="zonas-wrap">`;
+    for(let i=1;i<=t.zonas_sup;i++) html+=`<div class="zona-field"><label>Z${i}</label><input type="number" id="zsup-${i}" /></div>`;
+    html+=`</div>`;
+  }
+  if(t.zonas_inf>0){
+    html+=`<h2>Temperatura pantalla inferior (${t.zonas_inf} zona${t.zonas_inf>1?'s':''})</h2><div class="zonas-wrap">`;
+    for(let i=1;i<=t.zonas_inf;i++) html+=`<div class="zona-field"><label>Z${i}</label><input type="number" id="zinf-${i}" /></div>`;
+    html+=`</div>`;
+  }
+  html+=`<h2>Observaciones</h2><div class="field"><textarea id="c-obs" placeholder="Notas de este programa..."></textarea></div>`;
+  area.innerHTML=html;
+}
+
+function guardarPrograma(){
+  if(!termoActual) return;
+  const t=termoActual;
+  const tiempos=t.etapas.map((e,i)=>({etapa:e,inicio:document.getElementById(`ti-${i}-ini`)?.value||'',fin:document.getElementById(`ti-${i}-fin`)?.value||''}));
+  const tsup=[],tinf=[];
+  for(let i=1;i<=t.zonas_sup;i++) tsup.push(document.getElementById(`zsup-${i}`)?.value||'');
+  for(let i=1;i<=t.zonas_inf;i++) tinf.push(document.getElementById(`zinf-${i}`)?.value||'');
+  const largada=t.largada?[document.getElementById('larg-1')?.value||'',document.getElementById('larg-2')?.value||'',document.getElementById('larg-3')?.value||'']:null;
+  const prog={
+    id:Date.now(), termo:t.numero,
+    producto:document.getElementById('c-prod')?.value||'',
+    subindice:document.getElementById('c-sub')?.value||'',
+    color:document.getElementById('c-color')?.value||'',
+    peso:document.getElementById('c-peso')?.value||'',
+    material:document.getElementById('c-mat')?.value||'',
+    velocidad:document.getElementById('c-vel')?.value||'',
+    camisas:document.getElementById('c-cam')?.value||'',
+    expulsores:document.getElementById('c-exp')?.value||'',
+    mandriles:document.getElementById('c-mand')?.value||'',
+    matriz:[document.getElementById('c-mat1')?.value||'',document.getElementById('c-mat2')?.value||'',document.getElementById('c-mat3')?.value||''],
+    tiempos,largada,tsup,tinf,
+    presion_moldeo:document.getElementById('c-pmol')?.value||'',
+    presion_prensa:document.getElementById('c-ppes')?.value||'',
+    observaciones:document.getElementById('c-obs')?.value||'',
+    fecha:new Date().toLocaleDateString('es-AR'),
+  };
+  DB.programas.push(prog);
+  saveDB();
+  document.getElementById('c-msg').innerHTML=`<div class="badge-ok">✓ Programa "${prog.producto||'sin nombre'}" guardado en ${t.numero}</div>`;
+  window.scrollTo(0,0);
+}
+
+// ── BUSCAR ──────────────────────────────────────────────────
+function initBuscar(){
+  const sel=document.getElementById('b-termo');
+  sel.innerHTML='<option value="">— Todas —</option>';
+  DB.termos.forEach(t=>{ const o=document.createElement('option'); o.value=t.numero; o.textContent=t.numero; sel.appendChild(o); });
+  document.getElementById('b-resultado').innerHTML='';
+  document.getElementById('b-prod').value='';
+}
+
+function buscar(){
+  const termo=document.getElementById('b-termo').value;
+  const prod=document.getElementById('b-prod').value.trim().toLowerCase();
+  const res=DB.programas.filter(p=>{
+    const mt=!termo||p.termo===termo;
+    const mp=!prod||(p.producto||'').toLowerCase().includes(prod)||(p.subindice||'').toLowerCase().includes(prod);
+    return mt&&mp;
+  });
+  const box=document.getElementById('b-resultado');
+  if(!res.length){ box.innerHTML='<div class="no-data">No se encontraron programas.</div>'; return; }
+  box.innerHTML=res.map(p=>`
+    <div class="result-card" onclick="verDetalle(${p.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="rc-title">${p.producto||'Sin nombre'}${p.subindice?' / '+p.subindice:''}</div>
+        <span class="info-badge">${p.termo}</span>
+      </div>
+      <div class="rc-sub">
+        ${[p.color&&'Color: '+p.color, p.material&&'Mat: '+p.material, p.velocidad&&'Vel: '+p.velocidad, p.fecha].filter(Boolean).join(' · ')}
+        <span class="rc-arrow">Ver detalle ›</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function verDetalle(id){
+  const p=DB.programas.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('s-buscar-main').style.display='none';
+  const det=document.getElementById('s-detalle');
+  det.style.display='block';
+  window.scrollTo(0,0);
+
+  const fila=(k,v)=>v?`<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v}</span></div>`:'';
+
+  const tiemposHTML=p.tiempos.map(t=>`
+    <div class="detail-tiempo">
+      <div class="etapa-nombre">${t.etapa}</div>
+      <div class="etapa-vals">
+        <div class="val-box"><div class="val-label">Inicio</div><div class="val-num">${t.inicio||'—'}</div></div>
+        <div class="val-box"><div class="val-label">Fin</div><div class="val-num">${t.fin||'—'}</div></div>
+      </div>
+    </div>
+  `).join('');
+
+  const largadaHTML=p.largada?`<div class="detail-section"><h3>Largada</h3>${p.largada.map((v,i)=>fila('Campo '+(i+1),v)).join('')}</div>`:'';
+
+  const tsupHTML=p.tsup&&p.tsup.some(v=>v)?`<div class="detail-section"><h3>Temperatura pantalla superior</h3><div class="zonas-display">${p.tsup.map((v,i)=>`<div class="zona-display-item"><div class="zl">Z${i+1}</div><div class="zv">${v||'—'}</div></div>`).join('')}</div></div>`:'';
+
+  const tinfHTML=p.tinf&&p.tinf.some(v=>v)?`<div class="detail-section"><h3>Temperatura pantalla inferior</h3><div class="zonas-display">${p.tinf.map((v,i)=>`<div class="zona-display-item"><div class="zl">Z${i+1}</div><div class="zv">${v||'—'}</div></div>`).join('')}</div></div>`:'';
+
+  det.innerHTML=`
+    <button class="btn-back" onclick="volverBuscar()">← Volver a resultados</button>
+    <div style="margin-bottom:1.25rem">
+      <div style="font-size:22px;font-weight:700;color:var(--text)">${p.producto||'Sin nombre'}${p.subindice?' / '+p.subindice:''}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">Termoformadora: <strong style="color:var(--blue)">${p.termo}</strong>${p.fecha?' · '+p.fecha:''}</div>
+    </div>
+    <div class="detail-section"><h3>Datos del producto</h3>
+      ${fila('Producto',p.producto)}${fila('Subíndice',p.subindice)}${fila('Color',p.color)}${fila('Peso',p.peso)}${fila('Material',p.material)}${fila('Velocidad',p.velocidad)}
+    </div>
+    <div class="detail-section"><h3>Formato de armado</h3>
+      ${fila('Camisas',p.camisas)}${fila('Expulsores',p.expulsores)}${fila('Mandriles',p.mandriles)}${fila('Matriz',p.matriz.filter(Boolean).join(' / '))}
+    </div>
+    <div class="detail-section"><h3>Tiempos de ciclo</h3>${tiemposHTML}</div>
+    ${largadaHTML}
+    <div class="detail-section"><h3>Presiones</h3>
+      ${fila('Presión de moldeo',p.presion_moldeo)}${fila('Presión prensa pestaña',p.presion_prensa)}
+    </div>
+    ${tsupHTML}${tinfHTML}
+    ${p.observaciones?`<div class="detail-section"><h3>Observaciones</h3><div style="font-size:14px;color:var(--text);padding:4px 0">${p.observaciones}</div></div>`:''}
+  `;
+}
+
+function volverBuscar(){
+  document.getElementById('s-buscar-main').style.display='block';
+  document.getElementById('s-detalle').style.display='none';
+}
+
+// ── SERVICE WORKER ──────────────────────────────────────────
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
